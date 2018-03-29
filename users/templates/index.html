@@ -1,0 +1,224 @@
+{% extends 'base.html' %}
+<!-- 该页面不允许出现js以及css代码,content代码可直接写在本文件中，下面只是content的实例代码 -->
+{% block title %}首页index{% endblock %}
+{% load static %}
+{% block css %}
+    <!-- 此处填充css链接 -->
+{#        <link rel="stylesheet" href="/static/plot/css/reset.css" />#}
+<link rel="stylesheet" href={% static "plot/css/style.css" %} />
+{% endblock %}
+
+{% block content %}
+    {% if user.is_authenticated %}
+
+            <div id="main" style="height:800px;"></div>
+        {% block js %}
+            <script  src={% static "index/assets/js/echarts-all.js" %}></script>
+              <script >
+        var myChart = echarts.init(document.getElementById('main'), 'vintage');
+     option = {
+    color: ['green','#C1FFC1'],
+    title : {
+        text: '全国各省湿地面积(不包括港澳台)\nWetland area in all provinces of the country (excluding Hong Kong, Macao and Taiwan)',
+        subtext: '点击发光站位即可查询Click the luminescence station to quer',
+
+        x:'center'
+    },
+    tooltip : {
+        trigger: 'item'
+    },
+    legend: {
+        orient: 'vertical',
+        x:'left',
+        data:['湿地面积\nWetland area'],
+    },
+    dataRange: {
+        min: 0,
+        max: 900,
+        x: 'left',
+        y: 'bottom',
+        text:['单位(万公顷)\nunit(10000hectares)'],
+		/*
+        splitList: [
+            {start:800},
+            {start: 600, end: 800},
+            {start: 400, end: 600},
+            {start: 200, end: 400, },
+            {start: 100, end: 200, color: 'green'},
+            {end: 100}
+        ],*/
+
+        color: ['green','#C1FFC1'],
+    		// 文本，默认为数值文本
+        calculable : true
+    },
+    toolbox: {
+        show: false,
+        orient : 'vertical',
+        x: 'right',
+        y: 'center',
+        feature : {
+            mark : {show: false},
+            dataView : {show: true, readOnly: false},
+            restore : {show: true},
+            saveAsImage : {show: true}
+        }
+    },
+
+    series : [
+        {
+            name: '湿地面积\nWetland area',
+            type: 'map',
+            mapType: 'china',
+            roam: false,
+            itemStyle:{
+                normal:{label:{show:true}},
+
+                emphasis:{label:{show:true}}
+            },
+			       data : [],
+            markPoint : {
+                symbolSize: 5,       // 标注大小，半宽（半径）参数，当图形为方向或菱形则总宽度为symbolSize * 2
+                itemStyle: {
+
+                    normal: {
+
+                        borderColor: '#87cefa',
+                        borderWidth: 1,            // 标注边线线宽，单位px，默认为1
+                        label: {
+                            show: false
+                        }
+                    },
+                    emphasis: {
+                        borderColor: '#1e90ff',
+                        borderWidth: 5,
+                        label: {
+                            show: false
+                        }
+                    }
+                },
+                data : [
+
+                   {name: "黄河三角洲TheYellowRiverDelta",itemStyle:{normal: {color: 'yellow',} }},
+                    {name: "新洋港xinyanggang",itemStyle:{normal: {color: 'orange',} }},
+                    {name: "盘锦panjin",itemStyle:{normal: {color: 'purple',} }},
+                    {name: "四卯酉simaoyou",itemStyle:{normal: {color: 'red',} }}
+                ]
+            },
+          geoCoord:{
+          "黄河三角洲TheYellowRiverDelta":[118.49,37.46],
+          "新洋港xinyanggang":[120.13,33],
+           "盘锦panjin":[122.070714,41.119997],
+           "四卯酉simaoyou":[120.13,34],
+          },
+            data:[
+                {name: '北京',value: 4.81},
+                {name: '天津',value: 29.56},
+                {name: '上海',value: 46.46},
+                {name: '重庆',value: 20.72},
+                {name: '河北',value: 94.19},
+                {name: '河南',value: 62.79},
+                {name: '云南',value: 56.35},
+                {name: '辽宁',value: 139.48},
+                {name: '黑龙江',value: 514.33},
+                {name: '湖南',value:101.97},
+                {name: '安徽',value: 104.18},
+                {name: '山东',value: 173.75},
+                {name: '新疆',value: 394.82},
+                {name: '江苏',value: 282.28},
+                {name: '浙江',value: 111.01},
+                {name: '江西',value: 91.01},
+                {name: '湖北',value: 144.50},
+                {name: '广西',value: 75.43},
+                {name: '甘肃',value: 169.39},
+                {name: '山西',value: 15.19},
+                {name: '内蒙古',value: 601.06},
+                {name: '陕西',value: 91.01},
+                {name: '吉林',value: 99.76},
+                {name: '福建',value: 104.18},
+                {name: '贵州',value: 20.97},
+                {name: '广东',value: 175.34},
+                {name: '青海',value: 814.36},
+                {name: '西藏',value: 652.90},
+                {name: '四川',value: 174.78},
+                {name: '宁夏',value: 20.72},
+                {name: '海南',value: 32},
+
+            ]
+        },
+
+
+      {
+
+            type: 'map',
+            mapType: 'china',
+            data:[],
+            markPoint : {
+                symbol:'emptyCircle',
+                symbolSize : function (v){
+                    return 10 + v/100
+                },
+                effect : {
+                    show: true,
+                    shadowBlur : 0
+                },
+                itemStyle:{
+                    normal:{
+
+                        label:{show:true}
+                    }
+                },
+                data : [
+                 {name: "黄河三角洲TheYellowRiverDelta",itemStyle:{normal: {color: 'yellow',} }},
+                    {name: "新洋港xinyanggang",itemStyle:{normal: {color: 'orange',} }},
+                    {name: "盘锦panjin",itemStyle:{normal: {color: 'purple',} }},
+                    {name: "四卯酉simaoyou",itemStyle:{normal: {color: 'red',} }}
+
+                ]
+            }
+        },
+
+    ]
+};
+
+        myChart.showLoading();
+        myChart.setOption(option);
+        myChart.hideLoading();
+		//跳转到画图界面
+		var timestamp = Date.parse(new Date());
+		myChart.on('click', function (params)
+		{if (params.name =='四卯酉simaoyou')
+			window.open('{% url "users:plot" 'smy' %}');
+		if (params.name =='新洋港xinyanggang')
+			window.open('{% url "users:plot" 'xyg' %}');
+		if (params.name =='黄河三角洲TheYellowRiverDelta')
+			window.open('{% url "users:plot" 'hhsjz' %}');
+		if (params.name =='盘锦panjin')
+			window.open('{% url "users:plot" 'pj' %}');
+		});
+    </script>
+
+        {% endblock %}
+    {% else %}
+        <div >
+        <br>
+            <p>你还没有登录
+                Please log in
+                <button class="btn btn-default"><a href="{% url 'login' %}?next={{ request.path }}">登录login</a>
+                </button>
+                或者or
+                <button class="btn btn-default"><a href="{% url 'users:register' %}?next={{ request.path }}">注册register</a>
+                </button>
+            </p>
+        </div>
+            {% endif %}
+
+
+
+
+
+
+{% endblock %}
+
+
+

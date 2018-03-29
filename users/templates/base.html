@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+    {% load static %}
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{% block title %}首页HOME{% endblock %}</title>
+	<!-- Bootstrap Styles-->
+    <link rel="stylesheet" href={% static "index/assets/css/bootstrap.css" %}  />
+     <!-- FontAwesome Styles-->
+    <link rel="stylesheet"  href={% static "index/assets/css/font-awesome.css" %} />
+     <!-- Morris Chart Styles-->
+
+{#        <!-- Custom Styles-->#}
+   <link rel="stylesheet" href={% static "index/assets/css/custom-styles.css" %}  />
+     <!-- Google Fonts-->
+   <link href='http://fonts.googleapis.com/css?family=Open+Sans' rel='stylesheet' type='text/css' />
+     <!-- TABLE STYLES-->
+   <link rel="stylesheet" href={% static "index/assets/js/dataTables/dataTables.bootstrap.css" %}  />
+
+    {% block css %}{% endblock %}
+
+
+
+
+<!-- JS Scripts-->
+    <!-- jQuery Js -->
+    <script src={% static "index/assets/js/jquery-1.10.2.js" %}></script>
+      <!-- Bootstrap Js -->
+    <script src={% static "index/assets/js/bootstrap.min.js" %}></script>
+    <!-- Metis Menu Js -->
+    <script src={% static "index/assets/js/jquery.metisMenu.js" %} ></script>
+     <!-- DATA TABLE SCRIPTS -->
+    <script src={% static "index/assets/js/dataTables/jquery.dataTables.js" %}></script>
+    <script src={% static "index/assets/js/dataTables/dataTables.bootstrap.js" %}></script>
+
+         <!-- Custom Js -->
+    <script src={% static "index/assets/js/custom-scripts.js" %}></script>
+
+
+</head>
+<body>
+
+    <div id="wrapper">
+        <nav class="navbar navbar-default top-navbar" role="navigation">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".sidebar-collapse">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="{% url 'index' %}"><i class="fa fa-sitemap"></i> <strong>首页HOME</strong></a>
+
+            </div>
+
+            <ul class="nav navbar-top-links navbar-right">
+
+
+
+                <!-- /.dropdown -->
+                <li class="dropdown">
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" aria-expanded="false">
+                        <i class="fa fa-user fa-fw"></i> <i class="fa fa-caret-down"></i>
+                    </a>
+                    <ul class="dropdown-menu dropdown-user">
+
+                        <li><a href="{% url 'password_change' %}?next={{ request.path }}"><i class="fa fa-gear fa-fw"></i> 修改密码 change password</a>
+                        </li>
+                        <li class="divider"></li>
+
+                        <li><a href="{% url 'logout' %}?next={{ request.path }}"><i class="fa fa-sign-out fa-fw"></i> 退出登录 log out</a>
+                        </li>
+                    </ul>
+                    <!-- /.dropdown-user -->
+                </li>
+                <!-- /.dropdown -->
+            </ul>
+        </nav>
+        <!--/. NAV TOP  -->
+        <nav class="navbar-default navbar-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav" id="main-menu">
+
+					<li>
+                        <a href="#"><i class="fa fa-bar-chart-o"></i> 实验室信息Lab introduction<span class="fa arrow"></span></a>
+                        <ul class="nav nav-second-level">
+                             <li>
+                                <a href="http://www.qimg.cgs.gov.cn/xglj/kjcxpt/zgdzdcjbhsdswdzzdsys/sysgk3/">实验室概况Summary</a>
+                            </li>
+							<li>
+                                <a href="http://www.qimg.cgs.gov.cn/xglj/kjcxpt/zgdzdcjbhsdswdzzdsys/xswyh2/">学术委员会Academic Committee</a>
+                            </li>
+							<li>
+                                <a href="http://www.qimg.cgs.gov.cn/xglj/kjcxpt/zgdzdcjbhsdswdzzdsys/yjfx3/">研究方向Research direction</a>
+                            </li>
+							<li>
+                                <a href="http://www.qimg.cgs.gov.cn/xglj/kjcxpt/zgdzdcjbhsdswdzzdsys/rcdw2/">人才队伍Talent team</a>
+                            </li>
+							<li>
+                                <a href="http://www.qimg.cgs.gov.cn/xglj/kjcxpt/zgdzdcjbhsdswdzzdsys/zzxm2/">资助项目Funded projects</a>
+                            </li>
+
+							<li>
+                                <a href="http://www.qimg.cgs.gov.cn/xglj/kjcxpt/zgdzdcjbhsdswdzzdsys/kycg2/">科研成果Achievements</a>
+                            </li>
+
+                        </ul>
+                    </li>
+
+					<li>
+                        <a href="mobilechart.php"><i class="fa fa-bar-chart-o"></i> 手机版Phone<span class="fa arrow"></span></a>
+
+                    </li>
+                </ul>
+
+            </div>
+
+
+
+        </nav>
+        <!-- /. NAV SIDE  -->
+        <div id="page-wrapper" >
+            <div id="page-inner">
+
+                 <!-- /. ROW  -->
+                {% block content %}
+  {% block js %}
+
+  {% endblock %}
+                {% endblock %}
+
+            </div>
+            </div>
+                <!-- /. ROW  -->
+	</div>
+
+
+
+</body>
+</html>

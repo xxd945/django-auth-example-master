@@ -1,0 +1,2001 @@
+{% extends 'base.html' %}
+<!-- 该页面不允许出现js以及css代码,content代码可直接写在本文件中，下面只是content的实例代码 -->
+{% block title %}绘图plot{% endblock %}
+{% load static %}
+{% block css %}
+    <!-- 此处填充css链接 -->
+{#        <link rel="stylesheet" href="/static/plot/css/reset.css" />#}
+        <link rel="stylesheet" href={% static "plot/css/style.css" %} />
+{% endblock %}
+
+{% block content %}
+    <!-- 此处填充页面主体内容 -->
+    <div>
+                                    <div >
+                                                    <font id="showtime" class="page-header" size="6" color="#FF0000">
+                                                      请选择要查询或下载的时间段
+                                                        <br>
+                                                        Please select the time period to be queried or downloaded
+
+                                                  </font>
+                            {#					  	 <small>#}
+                            {#					 （每次操作前请务必选取时间）#}
+                            {#					 </small>#}
+                                                </div>
+
+
+
+                                    <div class="case">
+                                        <div class="calendarWarp" style="">
+                                            <input type="text" name="date" class='ECalendar' id="ECalendar_case2"  value=""/>
+                                        </div>
+
+                                    </div>
+
+
+                                    <div class="case">
+                                        <div class="calendarWarp" style="">
+                                            <input type="text" name="date" class='ECalendar' id="ECalendar_case3"  value=""/>
+                                        </div>
+
+                                        <div class="callback2">
+                                        开始时间start time： <span id= "start"></span>
+
+
+                                        </div>
+                                        <div class="callback">
+
+                                        结束时间end time： <span id= "end"></span>
+
+                                        </div>
+<div>
+                                    	<strong>请选择绘图类型Please select the drawing type：</strong>
+                                            <select id="types" >
+
+
+                                                <option value='main'>光电类Photoelectricity</option>
+                                                 <option value='second'>气象类Meteorology</option>
+                                                <option value= 'third'>土壤类Soil</option>
+
+                                            </select>
+</div>
+                                            <br>
+                                    <strong>查询类型Query type：</strong>
+                                            <select id="action" >
+
+
+                                                <option value='raw'>原始数据Raw data</option>
+                                                <option value='perhour'>每小时Per hour</option>
+                                                 <option value='perday'>每天Per day</option>
+                                                <option value= 'permonth'>每月Per month</option>
+
+                                            </select>
+                                             <br>
+                                            <br>
+                                          <tr>
+
+
+                                             <button  class="btn btn-default"  onclick="doTest('{% url 'users:plot' place %}')" >开始绘图plot</button>
+
+
+                                          </tr>
+
+                                    {% if start %}
+
+                                    <p>数据时间段为starttime{{ start }}至endtime{{ end }}</p>
+
+                                    {% endif %}
+                                    <br />
+                                    <tr>
+
+                                    {#<button id="a1" class="btn btn-default"  onclick=window.open("{% url 'users:output'  %}?start='{{ start }}'&end=2018-1-20") >数据下载</button>#}
+                                                <button id="a1" class="btn btn-default"  onclick="output('{% url 'users:output' %}')" >数据下载download</button>
+
+
+                                    </tr>
+
+                                    </div>
+
+
+
+
+
+
+                                    {% if types == 'third' %}
+                                    <!-- 画图div  -->
+
+
+                                    <div id="third" style="width:100%;height:800px;"></div>
+
+                                    {% elif types == 'second' %}
+
+                                    <div id="second" style="width:100%;height:800px;"></div>
+
+
+                                    {% else %}
+
+                                   <div id="main" style="width:100%;height:800px;"></div>
+
+                                    {% endif %}
+
+    </div>
+{#    {% include 'index.html' %}#}
+
+
+{% block js %}
+
+
+
+
+<script src={% static "plot/js/jquery.js" %}></script>
+ <!-- 画日历-->
+
+<script src={% static "plot/js/Ecalendar.jquery.min.js" %}></script>
+{#日历#}
+<script type="text/javascript">
+
+//window["x1"]="a";
+	$(function(){
+
+			$("#ECalendar_case2").ECalendar({
+					  type:"time",
+					 stamp:false,
+					 skin:5,
+					 format:"yyyy-mm-dd hh:ii:00",
+					 callback:function(v,e)
+					 {
+						 $(".callback2 span").html(v)
+
+
+					 }
+			});
+			$("#ECalendar_case3").ECalendar({
+					 type:"time",
+					 stamp:false,
+					 skin:5,
+					 format:"yyyy-mm-dd hh:ii:59",
+					 callback:function(v,e)
+					 {
+						 $(".callback span").html(v)
+
+					 }
+
+			});
+
+	})
+
+function output(url)
+{
+
+var temp = document.createElement("form");
+
+var startTime  = document.getElementById("start").innerText;
+
+var endTime = document.getElementById("end").innerText;
+{#如果没有选取时间参数，默认下载当前查询的时间#}
+if (startTime==''||endTime==null||endTime=='' )
+{
+{#alert("下载数据时间段为{{ start }}至{{ end }}");#}
+var PARAMS={"place":'{{ place }}',"start":'{{ start }}',"end":'{{end}}'};
+if('{{ start }}'==''){ alert(" 请选取正确的时间段");return}
+
+}
+else
+{
+ var PARAMS={"place":'{{ place }}',"start":startTime,"end":endTime};
+}
+
+  temp.action = url;
+  temp.method = "post";
+  temp.style.display = "none";
+  for (var x in PARAMS) {
+    var opt = document.createElement("textarea");
+    opt.name = x;
+    opt.value = PARAMS[x];
+     {#alert(opt.name+opt.value)#}
+    temp.appendChild(opt);
+  }
+  document.body.appendChild(temp);
+  temp.submit();
+
+
+}
+//post时间函数
+function doTest(url)
+{
+var temp = document.createElement("form");
+
+var types=document.getElementById("types").value;
+var action=document.getElementById("action").value;
+var startTime  = document.getElementById("start").innerText;
+var endTime = document.getElementById("end").innerText;
+if (startTime==null||startTime==''||endTime==null||endTime=='' )
+{
+alert("请选择正确的时间");
+return
+
+}
+{#post请求#}
+var PARAMS={"action":action,"start":startTime,"end":endTime,'types':types};
+  temp.action = url;
+  temp.method = "post";
+  temp.style.display = "none";
+  for (var x in PARAMS) {
+    var opt = document.createElement("textarea");
+    opt.name = x;
+    opt.value = PARAMS[x];
+     {#alert(opt.name+opt.value)#}
+    temp.appendChild(opt);
+  }
+  document.body.appendChild(temp);
+  temp.submit();
+    {#实现不跳转新页面#}
+  {#event.preventDefault();#}
+  {#return temp;#}
+
+}
+
+
+</script>
+
+ <!-- 画图 -->
+<script src={% static "plot/js/echarts.common.min.js" %}></script>
+
+<!-- main -->
+<script type="text/javascript">
+        // 基于准备好的dom，初始化echarts实例
+var myChart = echarts.init(document.getElementById('main'));
+
+        // 指定图表的配置项和数据
+var colors = [  '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
+    '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0',
+    '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700',
+    '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' ];
+var symbols=['emptyCircle' ,
+    'emptyCircle' , 'emptyRectangle' , 'emptyTriangle' , 'emptyDiamond'];
+option = {
+	title : {
+        text: '{{ place_zh }}',
+        subtext: '{{ place_en }}',
+        {#sublink: 'index.php',#}
+        x:'center'
+    },
+    color: colors,
+
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross'
+        }
+    },
+    grid: {
+		top:'30%',
+		left:'150',
+		right:'120'
+
+    },
+    toolbox: {
+        feature: {
+            mark : {show: true},
+            dataView: {show: true, readOnly: false},
+			magicType: {show: true, type: ['line', 'bar']},
+            restore: {show: true},
+            saveAsImage: {show: true}
+        }
+    },
+    legend: {
+		top:'15%',
+        data:['光量子\nPhotons','净辐射1\nNet radiation1','净辐射2\nNet radiation2','净辐射3\nNet radiation3','净辐射4\nNet radiation4'],
+           selected: {
+                    '光量子\nPhotons': false,
+                    '净辐射1\nNet radiation1': false,
+               '净辐射2\nNet radiation2': false,
+               '净辐射3\nNet radiation3': false,
+               '净辐射4\nNet radiation4': false
+                    }
+
+    },
+    xAxis: [
+        {
+            type: 'category',
+            axisTick: {
+                alignWithLabel: true
+            },
+
+            data: function ()
+			{
+                var list = [];
+              {% for d in datas %}
+
+                list.push('{{ d.addtime}}');
+
+              {% endfor %}
+                return list;
+            }()
+
+
+
+
+        }
+    ],
+    yAxis: [
+
+          {
+            type: 'value',
+            name: '光量子\nPhotons',
+            position: 'left',
+            axisLine: {
+                lineStyle: {
+                    color: colors[0]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}μmol/㎡/s'
+            }
+        },
+
+		{
+            type: 'value',
+            name: '净辐射\nNet radiation',
+            position: 'right',
+            axisLine: {
+                lineStyle: {
+                    color: colors[1]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}W/㎡'
+            }
+        },
+
+
+    ],
+    series: [
+        {
+            name:'光量子\nPhotons',
+            type:'line',
+            smooth:true,
+            symbol: symbols[0],
+            markPoint : {
+                data : [
+                    {type : 'max', name: '最大值'},
+                    {type : 'min', name: '最小值'}
+                ]
+                        },
+
+            data:
+
+			function ()
+			{
+                var list = [];
+
+                {% for i in datas %}
+
+                list.push({{ i.data1 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+        {
+
+            name:'净辐射1\nNet radiation1',
+            type:'line',
+            smooth:true,
+            symbol: symbols[1],
+            yAxisIndex: 1,
+            data:
+
+			function ()
+			{
+                var list = [];
+
+                {% for d in datas %}
+
+                list.push({{ d.data2 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+     {
+            name:'净辐射2\nNet radiation2',
+            type:'line',
+            smooth:true,
+			symbol: symbols[2],
+
+            yAxisIndex: 1,
+			itemStyle: {
+                normal: {
+                    color: colors[1],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data45 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+
+{
+            name:'净辐射3\nNet radiation3',
+            type:'line',
+            smooth:true,
+			symbol: symbols[3],
+            yAxisIndex: 1,
+			itemStyle: {
+                normal: {
+                    color:colors[1],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data46 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+    {
+            name:'净辐射4\nNet radiation4',
+            type:'line',
+            smooth:true,
+			symbol: symbols[4],
+            yAxisIndex: 1,
+			itemStyle: {
+                normal: {
+                    color: colors[1],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data47 }});
+
+                {% endfor %}
+                return list;
+            }()
+        }
+
+    ],
+
+};
+
+
+
+
+
+        myChart.showLoading();
+        myChart.setOption(option);
+        myChart.hideLoading();
+window.onresize = function ()
+    {
+        $($("#succeedReport > div")[0]).css("width","100%");//设置图表所在div中的div宽度
+        $($("#succeedReport > canvas")[0]).css("width", "100%");//设置图表的div宽度
+
+        succeedReportChart.resize(); //使第一个图表适应
+    }
+
+</script>
+
+
+<!-- second -->
+<script type="text/javascript">
+
+
+      // 基于准备好的dom，初始化echarts实例
+        var myChart = echarts.init(document.getElementById('second'));
+
+        // 指定图表的配置项和数据
+  var colors = [  '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
+    '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0',
+    '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700',
+    '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' ];
+
+ var title=['风速\nWind speed','风向\nWind direction','降水量\nPrecipitation','气压\nPressure','温度1\nTemperature1','温度2\nTemperature2','温度3\nTemperature3','温度4\nTemperature4','湿度1\nHumidity1','湿度2\nHumidity2','湿度3\nHumidity3','湿度4\nHumidity4'];
+ var showtitle=['风速\nWind speed','风向\nWind direction','降水量\nPrecipitation','气压\nPressure','温度\nTemperature','湿度\nHumidity'];
+ var showunit=['m/s','°','mm','Pa','℃','RH%'];
+ var yAxisIndexs=[0,1,2,3,4,4,4,4,5,5,5,5];
+  var symbols=['emptyCircle' ,'emptyCircle' ,'emptyCircle' ,'emptyCircle' ,
+     'emptyCircle' , 'emptyRectangle' , 'emptyTriangle' , 'emptyDiamond',
+     'emptyCircle' , 'emptyRectangle' , 'emptyTriangle' , 'emptyDiamond'];
+ var drawcol=[colors[yAxisIndexs[0]],colors[yAxisIndexs[1]],colors[yAxisIndexs[2]],colors[yAxisIndexs[3]],colors[yAxisIndexs[4]],colors[yAxisIndexs[5]],colors[yAxisIndexs[6]],colors[yAxisIndexs[7]],
+colors[yAxisIndexs[8]],colors[yAxisIndexs[9]],colors[yAxisIndexs[10]],colors[yAxisIndexs[11]]]
+option = {
+	title : {
+        text: '{{ place_zh }}',
+        subtext: '{{ place_en }}',
+        {#sublink: 'index.php',#}
+        x:'center'
+    },
+    color: colors,
+
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross'
+        },
+		right:'5'
+    },
+    grid: {
+
+
+		top:'30%',
+		left:'250',
+		right:'200'
+    },
+    toolbox: {
+        feature: {
+            dataView: {show: true, readOnly: false},
+			magicType: {show: true, type: ['line', 'bar']},
+            restore: {show: true},
+            saveAsImage: {show: true}
+        }
+    },
+    legend: {
+		top:'15%',
+        data:[title[0],title[1],title[2],title[3],title[4],title[5],title[6],title[7],title[8],title[9],title[10],title[11]],
+        selected: {
+
+        '风速\nWind speed': false,'风向\nWind direction': false,'降水量\nPrecipitation': false,'气压\nPressure': false,'温度1\nTemperature1': false,'温度2\nTemperature2': false,
+            '温度3\nTemperature3': false,'温度4\nTemperature4': false,'湿度1\nHumidity1': false,'湿度2\nHumidity2': false,'湿度3\nHumidity3': false,'湿度4\nHumidity4': false
+
+                    }
+    },
+    xAxis: [
+        {
+            type: 'category',
+            axisTick: {
+                alignWithLabel: true
+            },
+            data: function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push('{{ i.addtime }}');
+
+                {% endfor %}
+                return list;
+            }()
+
+
+
+
+        }
+    ],
+    yAxis: [
+
+          {
+            type: 'value',
+            name: showtitle[0],
+            position: 'left',
+            axisLine: {
+                lineStyle: {
+                    color: colors[0]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[0]
+            }
+        },
+
+		{
+            type: 'value',
+            name: showtitle[1],
+			offset:80,
+            position: 'left',
+            axisLine: {
+                lineStyle: {
+                    color: colors[1]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[1]
+            },
+        },
+
+		{
+            type: 'value',
+            name: showtitle[2],
+            position: 'right',
+            axisLine: {
+                lineStyle: {
+                    color: colors[2]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[2]
+            },
+        },
+
+		{
+            type: 'value',
+            name: showtitle[3],
+			offset: 60,
+            position: 'right',
+            axisLine: {
+                lineStyle: {
+                    color: colors[3]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[3]
+            },
+			//splitLine : {show : false}分隔符
+        },
+		{
+            type: 'value',
+            name: showtitle[4],
+			offset: 160,
+            position: 'left',
+            axisLine: {
+                lineStyle: {
+                    color: colors[4]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[4]
+            },
+			//splitLine : {show : false}分隔符
+        },
+		{
+            type: 'value',
+            name: showtitle[5],
+			offset: 130,
+            position: 'right',
+            axisLine: {
+                lineStyle: {
+                    color: colors[5]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[5]
+            },
+			//splitLine : {show : false}分隔符
+        }
+
+
+
+    ],
+    series: [
+//1
+
+        {
+
+            name:title[0],
+            type:'line',
+            smooth:true,
+			symbol: symbols[0],
+			yAxisIndex: yAxisIndexs[0],
+						itemStyle: {
+                normal: {
+                    color: drawcol[0],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data3 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+
+	//2
+        {
+
+            name:title[1],
+            type:'line',
+			symbol: symbols[1],smooth:true,
+            yAxisIndex: yAxisIndexs[1],
+			itemStyle: {
+                normal: {
+                    color: drawcol[1],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data4 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+	//3
+	 {
+            name:title[2],
+            type:'line',
+			symbol: symbols[2],smooth:true,
+			 yAxisIndex: yAxisIndexs[2],
+			itemStyle: {
+                normal: {
+                    color: drawcol[2],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data5 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+	//4
+	 {
+            name:title[3],
+            type:'line',smooth:true,
+			symbol: symbols[3],
+			 yAxisIndex: yAxisIndexs[3],
+			itemStyle: {
+                normal: {
+                    color: drawcol[3],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data6 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//5
+	{
+            name:title[4],
+            type:'line',smooth:true,
+			symbol: symbols[4],
+			 yAxisIndex: yAxisIndexs[4],
+			itemStyle: {
+                normal: {
+                    color: drawcol[4],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data7 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+			//6
+	{
+            name:title[5],
+            type:'line',smooth:true,
+			symbol: symbols[5],
+			 yAxisIndex: yAxisIndexs[5],
+			itemStyle: {
+                normal: {
+                    color: drawcol[5],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data8 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+				//7
+	{
+            name:title[6],
+            type:'line',smooth:true,
+			symbol: symbols[6],
+			 yAxisIndex: yAxisIndexs[6],
+			itemStyle: {
+                normal: {
+                    color: drawcol[6],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data9 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+				//8
+	{
+            name:title[7],
+			symbol: symbols[7],
+            type:'line',smooth:true,
+			 yAxisIndex: yAxisIndexs[7],
+			itemStyle: {
+                normal: {
+                    color: drawcol[7],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data10 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+				//9
+	{
+            name:title[8],
+            type:'line',smooth:true,
+			symbol: symbols[8],
+			 yAxisIndex: yAxisIndexs[8],
+			itemStyle: {
+                normal: {
+                    color: drawcol[8],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data11 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+	//10
+	{
+            name:title[9],
+            type:'line',smooth:true,
+			symbol: symbols[9],
+			yAxisIndex: yAxisIndexs[9],
+			itemStyle: {
+                normal: {
+                    color: drawcol[9],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+             {% for i in datas %}
+
+                list.push({{ i.data12 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//11
+	{
+            name:title[10],
+            type:'line',smooth:true,
+			symbol: symbols[10],
+			 yAxisIndex: yAxisIndexs[10],
+			itemStyle: {
+                normal: {
+                    color: drawcol[10],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data13 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//12
+	{
+            name:title[11],
+            type:'line',smooth:true,
+			symbol: symbols[11],
+			 yAxisIndex: yAxisIndexs[11],
+			itemStyle: {
+                normal: {
+                    color: drawcol[11],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data14 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+
+    ],
+
+};
+
+        myChart.showLoading();
+        myChart.setOption(option);
+        myChart.hideLoading();
+
+
+</script>
+
+<!-- third -->
+<script type="text/javascript">
+
+
+      // 基于准备好的dom，初始化echarts实例
+  var myChart = echarts.init(document.getElementById('third'));
+
+        // 指定图表的配置项和数据
+  var colors = [  '#ff7f50', '#87cefa', '#da70d6', '#32cd32', '#6495ed',
+    '#ff69b4', '#ba55d3', '#cd5c5c', '#ffa500', '#40e0d0',
+    '#1e90ff', '#ff6347', '#7b68ee', '#00fa9a', '#ffd700',
+    '#6b8e23', '#ff00ff', '#3cb371', '#b8860b', '#30e0e0' ];
+
+ var title=['含水量1\nwater content1','含水量2\nwater content2','含水量3\nwater content3','含水量4\nwater content4','含水量5\nwater content5','含水量6\nwater content6','含水量7\nwater content7','含水量8\nwater content8',
+           '导电率1\nconductivity1','导电率2\nconductivity2','导电率3\nconductivity3','导电率4\nconductivity4','导电率5\nconductivity5','导电率6\nconductivity6','导电率7\nconductivity7','导电率8\nconductivity8',
+		   '土壤温度1\nSoil temp1','土壤温度2\nSoil temp2','土壤温度3\nSoil temp3','土壤温度4\nSoil temp4','土壤温度5\nSoil temp5','土壤温度6\nSoil temp6','土壤温度7\nSoil temp7','土壤温度8\nSoil temp8'
+		   ,'热通量1\nheat flux1','热通量2\nheat flux2','热通量3\nheat flux3','热通量4\nheat flux4','水位\nwater level','水温\nwater temp'];
+ var showtitle=['含水量\nwater content','导电率\nconductivity','土壤温度\nSoil temp','热通量\nheat flux','水位\nwater level','水温\nwater temp'];
+ var showunit=['m³/m³','S/m','℃','W/㎡','cm','℃'];
+ var yAxisIndexs=[0,0,0,0,0,0,0,0,
+				  1,1,1,1,1,1,1,1,
+				  2,2,2,2,2,2,2,2,3,3,3,3,4,5];
+ var symbols=['emptyCircle' , 'emptyRectangle' , 'emptyTriangle' , 'emptyDiamond','circle' ,'rectangle' , 'triangle' , 'diamond',
+			  'emptyCircle' , 'emptyRectangle' , 'emptyTriangle' , 'emptyDiamond','circle' ,'rectangle' , 'triangle' , 'diamond',
+			  'emptyCircle' , 'emptyRectangle' , 'emptyTriangle' , 'emptyDiamond','circle' ,'rectangle' , 'triangle' , 'diamond',
+			  'emptyCircle' , 'emptyRectangle' , 'emptyTriangle' , 'emptyDiamond','emptyCircle','emptyCircle'];
+var drawcol=[colors[yAxisIndexs[0]],colors[yAxisIndexs[1]],colors[yAxisIndexs[2]],colors[yAxisIndexs[3]],colors[yAxisIndexs[4]],colors[yAxisIndexs[5]],colors[yAxisIndexs[6]],colors[yAxisIndexs[7]],
+colors[yAxisIndexs[8]],colors[yAxisIndexs[9]],colors[yAxisIndexs[10]],colors[yAxisIndexs[11]],colors[yAxisIndexs[12]],colors[yAxisIndexs[13]],colors[yAxisIndexs[14]],colors[yAxisIndexs[15]],
+colors[yAxisIndexs[16]],colors[yAxisIndexs[17]],colors[yAxisIndexs[18]],colors[yAxisIndexs[19]],colors[yAxisIndexs[20]],colors[yAxisIndexs[21]],colors[yAxisIndexs[22]],colors[yAxisIndexs[23]],colors[yAxisIndexs[24]],
+colors[yAxisIndexs[25]],colors[yAxisIndexs[26]],colors[yAxisIndexs[27]],colors[yAxisIndexs[28]],colors[yAxisIndexs[29]]];
+
+
+option = {
+	title : {
+        text: '{{ place_zh }}',
+        subtext: '{{ place_en }}',
+        {#sublink: 'index.php',#}
+        x:'center'
+    },
+    color: colors,
+
+    tooltip: {
+        trigger: 'axis',
+        axisPointer: {
+            type: 'cross'
+        }
+    },
+    grid: {
+		top:'35%',
+		left:'200',
+		right:'200'
+    },
+    toolbox: {
+        feature: {
+            dataView: {show: true, readOnly: false},
+			magicType: {show: true, type: ['line', 'bar']},
+            restore: {show: true},
+            saveAsImage: {show: true}
+        }
+    },
+    legend: {
+		top:'10%',
+        data:[title[0],title[1],title[2],title[3],title[4],title[5],title[6],title[7],title[8],title[9],
+		     title[10],title[11],title[12],title[13],title[14],title[15],title[16],title[17],title[18],title[19],
+			 title[20],title[21],title[22],title[23],title[24],title[25],title[26],title[27],title[28],title[29],
+			 title[30]],
+      selected: {
+          '含水量1\nwater content1': false,'含水量2\nwater content2': false,'含水量3\nwater content3': false,'含水量4\nwater content4': false,'含水量5\nwater content5': false,'含水量6\nwater content6': false,'含水量7\nwater content7': false,'含水量8\nwater content8': false,
+           '导电率1\nconductivity1': false,'导电率2\nconductivity2': false,'导电率3\nconductivity3': false,'导电率4\nconductivity4': false,'导电率5\nconductivity5': false,'导电率6\nconductivity6': false,'导电率7\nconductivity7': false,'导电率8\nconductivity8': false,
+		   '土壤温度1\nSoil temp1': false,'土壤温度2\nSoil temp2': false,'土壤温度3\nSoil temp3': false,'土壤温度4\nSoil temp4': false,'土壤温度5\nSoil temp5': false,'土壤温度6\nSoil temp6': false,'土壤温度7\nSoil temp7': false,'土壤温度8\nSoil temp8': false
+		   ,'热通量1\nheat flux1': false,'热通量2\nheat flux2': false,'热通量3\nheat flux3': false,'热通量4\nheat flux4': false,'水位\nwater level': false,'水温\nwater temp': false
+            }
+
+    },
+    xAxis: [
+        {
+            type: 'category',
+            axisTick: {
+                alignWithLabel: true
+            },
+            data: function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push('{{ i.addtime }}');
+
+                {% endfor %}
+                return list;
+            }()
+
+
+
+
+        }
+    ],
+    yAxis: [
+
+          {
+            type: 'value',
+            name: showtitle[0],
+            position: 'left',
+            axisLine: {
+                lineStyle: {
+                    color: colors[0]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[0]
+            }
+        },
+
+		{
+            type: 'value',
+            name: showtitle[1],
+			offset:80,
+            position: 'left',
+            axisLine: {
+                lineStyle: {
+                    color: colors[1]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[1]
+            },
+        },
+
+		{
+            type: 'value',
+            name: showtitle[2],
+            position: 'right',
+            axisLine: {
+                lineStyle: {
+                    color: colors[2]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[2]
+            },
+        },
+
+		{
+            type: 'value',
+            name: showtitle[3],
+			offset: 60,
+            position: 'right',
+            axisLine: {
+                lineStyle: {
+                    color: colors[3]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[3]
+            },
+			//splitLine : {show : false}分隔符
+        },
+		{
+            type: 'value',
+            name: showtitle[4],
+			offset: 150,
+            position: 'left',
+            axisLine: {
+                lineStyle: {
+                    color: colors[4]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[4]
+            },
+			//splitLine : {show : false}分隔符
+        },
+		{
+            type: 'value',
+            name: showtitle[5],
+			offset: 130,
+            position: 'right',
+            axisLine: {
+                lineStyle: {
+                    color: colors[5]
+                }
+            },
+            axisLabel: {
+                formatter: '{value}'+showunit[5]
+            },
+			//splitLine : {show : false}分隔符
+        }
+
+
+    ],
+    series: [
+	//1
+
+        {
+
+            name:title[0],
+            type:'line',smooth:true,
+			symbol: symbols[0],
+			yAxisIndex: yAxisIndexs[0],
+						itemStyle: {
+                normal: {
+                    color: drawcol[0],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data15 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+
+	//2
+        {
+
+            name:title[1],
+            type:'line',smooth:true,
+			symbol: symbols[1],
+            yAxisIndex: yAxisIndexs[1],
+			itemStyle: {
+                normal: {
+                    color: drawcol[1],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data16 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+	//3
+	 {
+            name:title[2],
+            type:'line',smooth:true,
+			symbol: symbols[2],
+			 yAxisIndex: yAxisIndexs[2],
+			itemStyle: {
+                normal: {
+                    color: drawcol[2],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data17 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+	//4
+	 {
+            name:title[3],
+            type:'line',smooth:true,
+			symbol: symbols[3],
+			 yAxisIndex: yAxisIndexs[3],
+			itemStyle: {
+                normal: {
+                    color: drawcol[3],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data18 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//5
+	{
+            name:title[4],
+            type:'line',smooth:true,
+			symbol: symbols[4],
+			 yAxisIndex: yAxisIndexs[4],
+			itemStyle: {
+                normal: {
+                    color: drawcol[4],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data19 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+			//6
+	{
+            name:title[5],
+            type:'line',smooth:true,
+			symbol: symbols[5],
+			 yAxisIndex: yAxisIndexs[5],
+			itemStyle: {
+                normal: {
+                    color: drawcol[5],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data20 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+				//7
+	{
+            name:title[6],
+            type:'line',smooth:true,
+			symbol: symbols[6],
+			 yAxisIndex: yAxisIndexs[6],
+			itemStyle: {
+                normal: {
+                    color: drawcol[6],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data21 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+				//8
+	{
+            name:title[7],
+			symbol: symbols[7],
+            type:'line',smooth:true,
+			 yAxisIndex: yAxisIndexs[7],
+			itemStyle: {
+                normal: {
+                    color: drawcol[7],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data22 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+				//9
+	{
+            name:title[8],
+            type:'line',smooth:true,
+			symbol: symbols[8],
+			 yAxisIndex: yAxisIndexs[8],
+			itemStyle: {
+                normal: {
+                    color: drawcol[8],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data23 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+	//10
+	{
+            name:title[9],
+            type:'line',smooth:true,
+			symbol: symbols[9],
+			yAxisIndex: yAxisIndexs[9],
+			itemStyle: {
+                normal: {
+                    color: drawcol[9],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+             {% for i in datas %}
+
+                list.push({{ i.data24 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//11
+	{
+            name:title[10],
+            type:'line',smooth:true,
+			symbol: symbols[10],
+			 yAxisIndex: yAxisIndexs[10],
+			itemStyle: {
+                normal: {
+                    color: drawcol[10],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data25 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//12
+	{
+            name:title[11],
+            type:'line',smooth:true,
+			symbol: symbols[11],
+			 yAxisIndex: yAxisIndexs[11],
+			itemStyle: {
+                normal: {
+                    color: drawcol[11],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data26 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//13
+
+	{
+            name:title[12],
+            type:'line',smooth:true,
+			symbol: symbols[12],
+			 yAxisIndex: yAxisIndexs[12],
+			itemStyle: {
+                normal: {
+                    color: drawcol[12],
+						},
+
+						},
+		   data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data27 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+
+
+//14
+        {
+
+
+            name:title[13],
+            type:'line',smooth:true,
+			symbol: symbols[13],
+            yAxisIndex: yAxisIndexs[13],
+			itemStyle: {
+                normal: {
+                    color: drawcol[13],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data28 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+		 //15
+	       {
+
+
+            name:title[14],
+            type:'line',smooth:true,
+			symbol: symbols[14],
+            yAxisIndex: yAxisIndexs[14],
+			itemStyle: {
+                normal: {
+                    color: drawcol[14],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+               {% for i in datas %}
+
+                list.push({{ i.data29 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+
+		 //16
+        {
+
+            name:title[15],
+            type:'line',smooth:true,
+			symbol: symbols[15],
+            yAxisIndex: yAxisIndexs[15],
+			itemStyle: {
+                normal: {
+                    color: drawcol[15],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data30 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+
+		 //17
+        {
+
+            name:title[16],
+            type:'line',smooth:true,
+			symbol: symbols[16],
+            yAxisIndex: yAxisIndexs[16],
+			itemStyle: {
+                normal: {
+                    color: drawcol[16],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data31 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+		 //18
+        {
+
+            name:title[17],
+            type:'line',smooth:true,
+			symbol: symbols[17],
+            yAxisIndex: yAxisIndexs[17],
+			itemStyle: {
+                normal: {
+                    color: drawcol[17],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data32 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+
+		 //19
+        {
+
+            name:title[18],
+            type:'line',smooth:true,
+			symbol: symbols[18],
+            yAxisIndex: yAxisIndexs[18],
+			itemStyle: {
+                normal: {
+                    color: drawcol[18],
+						},
+
+						},
+            data:
+
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data33 }});
+
+                {% endfor %}
+                return list;
+            }()
+         },
+
+ //20
+	 {
+            name:title[19],
+            type:'line',smooth:true,
+			symbol: symbols[19],
+			 yAxisIndex: yAxisIndexs[19],
+			itemStyle: {
+                normal: {
+                    color: drawcol[19],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+             {% for i in datas %}
+
+                list.push({{ i.data34 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		//21
+	 {
+            name:title[20],
+            type:'line',smooth:true,
+			symbol: symbols[20],
+			 yAxisIndex: yAxisIndexs[20],
+			itemStyle: {
+                normal: {
+                    color: drawcol[20],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data35 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+//22
+	 {
+            name:title[21],
+            type:'line',smooth:true,
+			symbol: symbols[21],
+			 yAxisIndex: yAxisIndexs[21],
+			itemStyle: {
+                normal: {
+                    color: drawcol[21],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data36 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+//23
+	 {
+            name:title[22],
+            type:'line',smooth:true,
+			symbol: symbols[22],
+			 yAxisIndex: yAxisIndexs[22],
+			itemStyle: {
+                normal: {
+                    color: drawcol[22],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+			{% for i in datas %}
+
+                list.push({{ i.data37 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+//24
+	 {
+            name:title[23],
+            type:'line',smooth:true,
+			symbol: symbols[23],
+			 yAxisIndex: yAxisIndexs[23],
+			itemStyle: {
+                normal: {
+                    color: drawcol[23],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data38 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+//25
+	 {
+            name:title[24],
+            type:'line',smooth:true,
+			symbol: symbols[24],
+			 yAxisIndex: yAxisIndexs[24],
+			itemStyle: {
+                normal: {
+                    color: drawcol[24],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data39 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+	 //26
+	 {
+            name:title[25],
+            type:'line',smooth:true,
+			symbol: symbols[25],
+			 yAxisIndex: yAxisIndexs[25],
+			itemStyle: {
+                normal: {
+                    color: drawcol[25],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data40 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+
+	//27
+	 {
+            name:title[26],
+            type:'line',smooth:true,
+			symbol: symbols[26],
+			 yAxisIndex: yAxisIndexs[26],
+			itemStyle: {
+                normal: {
+                    color: drawcol[26],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data41 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+//28
+	 {
+            name:title[27],
+            type:'line',smooth:true,
+			symbol: symbols[27],
+			 yAxisIndex: yAxisIndexs[27],
+			itemStyle: {
+                normal: {
+                    color: drawcol[27],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+              {% for i in datas %}
+
+                list.push({{ i.data42 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		{
+            name:title[28],
+            type:'line',smooth:true,
+			symbol: symbols[28],
+			 yAxisIndex: yAxisIndexs[28],
+			itemStyle: {
+                normal: {
+                    color: drawcol[28],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data43 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+		{
+            name:title[29],
+            type:'line',smooth:true,
+			symbol: symbols[29],
+			 yAxisIndex: yAxisIndexs[29],
+			itemStyle: {
+                normal: {
+                    color:drawcol[29],
+						},
+
+						},
+            data:
+			function ()
+			{
+                var list = [];
+
+               {% for i in datas %}
+
+                list.push({{ i.data44 }});
+
+                {% endfor %}
+                return list;
+            }()
+        },
+
+    ],
+
+};
+
+        myChart.showLoading();
+        myChart.setOption(option);
+        myChart.hideLoading();
+
+</script>
+
+{% endblock %}
+{% endblock %}
+

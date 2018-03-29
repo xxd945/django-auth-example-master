@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+{% for d in datas %}
+    <p>
+    {{ d.addtime|date:"Y年F  " }}<br>{{ d.data1 }}
+    </p>
+
+
+{% endfor %}
+{% for d in days %}
+    <p>
+    {{ d.addtime }}<br>{{ d.data1 }}
+    </p>
+
+
+{% endfor %}
+</body>
+</html>
